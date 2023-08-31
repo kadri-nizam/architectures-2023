@@ -1,3 +1,4 @@
+import logging
 import tomllib
 from dataclasses import dataclass
 from enum import StrEnum
@@ -33,7 +34,8 @@ class KeplerData:
 
         return info
 
-    def all_planet_candidates(self):
+    @property
+    def all_candidates(self):
         return (
             pd.concat([self.singles, self.multis])
             .reset_index(drop=True)
@@ -215,11 +217,15 @@ def load_config(config_file_path: str = "") -> dict[str, Any]:
         dict[str, Any]
             Configuration dictionary.
     """
+    import json
+
     if not config_file_path:
         config_file_path = f"{Path(__file__).parent / '../config.toml'}"
 
     with open(config_file_path, "rb") as f:
-        return tomllib.load(f)
+        config = tomllib.load(f)
+        logging.log(logging.INFO, f"Config:\n{json.dumps(config, indent=3)}")
+        return config
 
 
 def load_data(data_path: str = "") -> tuple[pd.DataFrame, str]:
@@ -235,18 +241,28 @@ def load_data(data_path: str = "") -> tuple[pd.DataFrame, str]:
         tuple[pd.DataFrame, str]
             Dataframe and name of the file loaded.
     """
+    root = Path(__file__).parent / ".."
+
     if not data_path:
-        path = Path(__file__).parent / "../data/raw"
+        path = root / "data" / "raw"
 
         # Glob returns a list of paths with the CSV extension
         # max returns the latest file
         data_path = str(max(path.glob("*.csv")))
 
+    if (processed := root / "data" / "processed" / Path(data_path).name).exists():
+        logging.log(logging.INFO, f"Cached data found. Loading from {processed}")
+        df = pd.read_csv(processed)
+        return df, str(processed)
+
     df = pd.read_csv(data_path)
     df = clean_data(df)
     df = _label_position(df)
 
-    return df, Path(data_path).name
+    # cache the processed dataframe for future use
+    df.to_csv(processed, index=False)
+
+    return df, data_path
 
 
 def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
