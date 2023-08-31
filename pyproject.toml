@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "architectures-2023"
+version = "0.1.0"
+description = "Repository for generating figures and statistic for the paper Orbital Periods and Other Properties of Kepler Planets"
+authors = ["Kadri Nizam <knizam@psu.edu>"]
+readme = "README.md"
+packages = [{include = "architectures_2023"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+scikit-learn = "^1.2.2"
+pandas = "^2.0.1"
+numpy = "^1.24.3"
+matplotlib = "^3.7.1"
+sklearn = "^0.0.post4"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+pytest = "^7.3.1"
+pytest-cov = "^4.0.0"
+mypy = "^1.2.0"
+ipykernel = "^6.22.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
