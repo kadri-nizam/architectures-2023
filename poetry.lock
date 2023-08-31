@@ -1521,17 +1521,6 @@ files = [
 ]
 
 [[package]]
-name = "sklearn"
-version = "0.0.post4"
-description = "deprecated sklearn package, use scikit-learn instead"
-category = "main"
-optional = false
-python-versions = "*"
-files = [
-    {file = "sklearn-0.0.post4.tar.gz", hash = "sha256:0e81ec9c32d4bb418e7be8f1ec1027d174975502dc84cbc4f4564b4cba31e674"},
-]
-
-[[package]]
 name = "stack-data"
 version = "0.6.2"
 description = "Extract data from python stack frames and tracebacks for informative displays"
@@ -1639,4 +1628,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "4027ba16d4ebe427f9e52f7df32f83d89f030b88108357565f168de62f428331"
+content-hash = "4be48ccd2365340c4e076533d3115703fdb2f72fea90ec973e0234d4cadb4b44"
