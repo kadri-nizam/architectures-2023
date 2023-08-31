@@ -1,8 +1,8 @@
+import tomllib
 from dataclasses import dataclass
 from enum import StrEnum
 from functools import partial
 from pathlib import Path
-import tomllib
 from typing import Any, Callable
 
 import pandas as pd

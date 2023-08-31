@@ -1,9 +1,9 @@
 from typing import Any
-import matplotlib as mpl
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
 
+import matplotlib as mpl
 import numpy as np
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from numpy.typing import NDArray
 
 __all__ = ["cdf", "save_figure"]
