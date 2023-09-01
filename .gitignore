@@ -2,7 +2,7 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,visualstudiocode,jupyternotebooks,python
 
 ### Generated figures and data ###
-data/
+data/**/*.csv
 *.pdf
 
 ### JupyterNotebooks ###
