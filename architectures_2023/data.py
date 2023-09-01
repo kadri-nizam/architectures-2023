@@ -81,129 +81,6 @@ class KeplerData:
         return self.multis.groupby("system").filter(fn)
 
 
-def process_data(
-    df: pd.DataFrame,
-    config: dict,
-    status_flag: STATUS_FLAG,
-) -> KeplerData:
-    """Prepare data for analysis.
-
-    Data is filtered, split into multi-planet and single-planet systems and demoted if necessary. Configuration is read from the config.toml file.
-
-    Parameters:
-    -----------
-        df : pd.DataFrame
-            Dataframe to process.
-        config : dict[str, Any]
-            Configuration dictionary based on the config.toml file.
-        status_flag : STATUS_FLAG, optional
-            Status flag to filter the data. If not provided, all data is used.
-
-    Returns:
-    --------
-        KeplerData
-            Instance of KeplerData containing the singles and multis dataframes.
-    """
-
-    fn = partial(filter_data, status_flag=status_flag, **config["data_filtering"])
-
-    if config["data_processing"]["pre_split_filtering"]:
-        singles, multis = _filter_then_split(df, fn)
-    else:
-        singles, multis = _split_then_filter(df, fn)
-
-    if config["data_processing"]["demote_multis_to_singles"]:
-        singles, multis = demote_multis_to_singles(singles, multis)
-
-    return KeplerData(singles, multis, config, status_flag)
-
-
-def demote_multis_to_singles(
-    singles: pd.DataFrame,
-    multis: pd.DataFrame,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Demote multi-planet systems to single-planet systems if the system has been filtered down to a single planet.
-
-    Parameters:
-    -----------
-        singles : pd.DataFrame
-            Single-planet systems.
-        multis : pd.DataFrame
-            Multi-planet systems.
-
-    Returns:
-    --------
-        tuple[pd.DataFrame, pd.DataFrame]
-            Updated single-planet and multi-planet systems.
-    """
-
-    new_singles, multis = get_multis_and_singles(multis)
-
-    new_singles["position"] = "demoted"
-    singles = (
-        pd.concat([singles, new_singles])
-        .sort_values(by=["system"])
-        .reset_index(drop=True)
-    )
-    singles["position"] = singles["position"].astype("category")
-
-    return singles, multis
-
-
-def get_multis_and_singles(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Divides the full Kepler dataframe into single-planet and multi-planet systems.
-
-    Parameters:
-    -----------
-        df : pd.DataFrame
-            Full Kepler dataset.
-
-    Returns:
-    --------
-        tuple[pd.DataFrame, pd.DataFrame]
-            Dataframes with single-planet and multi-planet systems.
-    """
-
-    multis_mask = df["system"].duplicated(keep=False)
-    multis = df[multis_mask].reset_index(drop=True)
-
-    singles = df.drop(df[multis_mask].index).reset_index(drop=True)
-
-    return singles, multis
-
-
-def filter_data(
-    df: pd.DataFrame,
-    status_flag: STATUS_FLAG | None = None,
-    min_ttvperiod: float = 0,
-    min_snr: float = 12,
-) -> pd.DataFrame:
-    """Filters the dataframe based on the status flag, minimum TTV period and minimum SNR.
-
-    status_flag can be one of the following:
-    - "^P.*" for all period related statistics
-    - "^[PR].*" for all radius related statistics
-    - "^R.*" for all radius-disposition related statistics
-
-    Parameters:
-    -----------
-        df : pd.DataFrame
-            Dataframe to filter.
-
-    Returns:
-    --------
-        pd.DataFrame
-            Filtered dataframe.
-    """
-    if status_flag is not None:
-        df = df[df["statusflag"].str.match(status_flag)]
-
-    df = df[df["ttvperiod"] >= min_ttvperiod]
-    df = df[df["snr"] >= min_snr]
-
-    return df.reset_index(drop=True)
-
-
 def load_config(config_file_path: str = "") -> dict[str, Any]:
     """Loads a configuration file specifying details on data import/processing and analysis.
 
@@ -265,6 +142,129 @@ def load_data(data_path: str = "") -> tuple[pd.DataFrame, str]:
     return df, data_path
 
 
+def process_data(
+    df: pd.DataFrame,
+    config: dict,
+    status_flag: STATUS_FLAG,
+) -> KeplerData:
+    """Prepare data for analysis.
+
+    Data is filtered, split into multi-planet and single-planet systems and demoted if necessary. Configuration is read from the config.toml file.
+
+    Parameters:
+    -----------
+        df : pd.DataFrame
+            Dataframe to process.
+        config : dict[str, Any]
+            Configuration dictionary based on the config.toml file.
+        status_flag : STATUS_FLAG, optional
+            Status flag to filter the data. If not provided, all data is used.
+
+    Returns:
+    --------
+        KeplerData
+            Instance of KeplerData containing the singles and multis dataframes.
+    """
+
+    fn = partial(filter_data, status_flag=status_flag, **config["data_filtering"])
+
+    if config["data_processing"]["pre_split_filtering"]:
+        singles, multis = _filter_then_split(df, fn)
+    else:
+        singles, multis = _split_then_filter(df, fn)
+
+    if config["data_processing"]["demote_multis_to_singles"]:
+        singles, multis = demote_multis_to_singles(singles, multis)
+
+    return KeplerData(singles, multis, config, status_flag)
+
+
+def filter_data(
+    df: pd.DataFrame,
+    status_flag: STATUS_FLAG | None = None,
+    min_ttvperiod: float = 0,
+    min_snr: float = 12,
+) -> pd.DataFrame:
+    """Filters the dataframe based on the status flag, minimum TTV period and minimum SNR.
+
+    status_flag can be one of the following:
+    - "^P.*" for all period related statistics
+    - "^[PR].*" for all radius related statistics
+    - "^R.*" for all radius-disposition related statistics
+
+    Parameters:
+    -----------
+        df : pd.DataFrame
+            Dataframe to filter.
+
+    Returns:
+    --------
+        pd.DataFrame
+            Filtered dataframe.
+    """
+    if status_flag is not None:
+        df = df[df["statusflag"].str.match(status_flag)]
+
+    df = df[df["ttvperiod"] >= min_ttvperiod]
+    df = df[df["snr"] >= min_snr]
+
+    return df.reset_index(drop=True)
+
+
+def get_multis_and_singles(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Divides the full Kepler dataframe into single-planet and multi-planet systems.
+
+    Parameters:
+    -----------
+        df : pd.DataFrame
+            Full Kepler dataset.
+
+    Returns:
+    --------
+        tuple[pd.DataFrame, pd.DataFrame]
+            Dataframes with single-planet and multi-planet systems.
+    """
+
+    multis_mask = df["system"].duplicated(keep=False)
+    multis = df[multis_mask].reset_index(drop=True)
+
+    singles = df.drop(df[multis_mask].index).reset_index(drop=True)
+
+    return singles, multis
+
+
+def demote_multis_to_singles(
+    singles: pd.DataFrame,
+    multis: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Demote multi-planet systems to single-planet systems if the system has been filtered down to a single planet.
+
+    Parameters:
+    -----------
+        singles : pd.DataFrame
+            Single-planet systems.
+        multis : pd.DataFrame
+            Multi-planet systems.
+
+    Returns:
+    --------
+        tuple[pd.DataFrame, pd.DataFrame]
+            Updated single-planet and multi-planet systems.
+    """
+
+    new_singles, multis = get_multis_and_singles(multis)
+
+    new_singles["position"] = "demoted"
+    singles = (
+        pd.concat([singles, new_singles])
+        .sort_values(by=["system"])
+        .reset_index(drop=True)
+    )
+    singles["position"] = singles["position"].astype("category")
+
+    return singles, multis
+
+
 def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """Converts pandas dataframe columns to lowercase, replaces spaces with underscores and removes special characters.
 
@@ -316,25 +316,6 @@ def _split_then_filter(
     return singles, multis
 
 
-def _convert_column_datatypes(df: pd.DataFrame) -> pd.DataFrame:
-    """Converts the column data types to the ones specified in COLUMN_DATATYPE.
-
-    Parameters:
-    -----------
-        df : pd.DataFrame
-            Dataframe to convert.
-
-    Returns:
-    --------
-        pd.DataFrame
-            Converted dataframe.
-    """
-    for column, datatype in COLUMN_DATATYPE.items():
-        df[column] = df[column].astype(datatype)  # type: ignore
-
-    return df
-
-
 def _label_position(df: pd.DataFrame) -> pd.DataFrame:
     """Labels the planets in the dataframe as innermost, outermost or middle. Single-planet systems are labeled as single.
 
@@ -361,6 +342,25 @@ def _label_position(df: pd.DataFrame) -> pd.DataFrame:
 
     # Change to categorical type
     df["position"] = df["position"].astype("category")
+
+    return df
+
+
+def _convert_column_datatypes(df: pd.DataFrame) -> pd.DataFrame:
+    """Converts the column data types to the ones specified in COLUMN_DATATYPE.
+
+    Parameters:
+    -----------
+        df : pd.DataFrame
+            Dataframe to convert.
+
+    Returns:
+    --------
+        pd.DataFrame
+            Converted dataframe.
+    """
+    for column, datatype in COLUMN_DATATYPE.items():
+        df[column] = df[column].astype(datatype)  # type: ignore
 
     return df
 
