@@ -1,33 +1,23 @@
+from enum import StrEnum
 from typing import Any
 
 import matplotlib as mpl
 import numpy as np
+import pandas as pd
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
 from numpy.typing import NDArray
 
-__all__ = ["cdf", "save_figure"]
-
-# customize matplotlib rcParams upon import
-mpl.rcParams["axes.labelsize"] = 10
-mpl.rcParams["xtick.labelsize"] = 10
-mpl.rcParams["ytick.labelsize"] = 10
-mpl.rcParams["legend.fontsize"] = 10
-mpl.rcParams["font.family"] = "serif"
-mpl.rcParams["font.serif"] = ["Computer Modern Roman"]
-mpl.rcParams["text.usetex"] = True
+__all__ = ["cdf", "save_figure", "Colors", "PLOT_FORMAT"]
 
 
 def cdf(
     ax: Axes,
-    data: NDArray[np.floating[Any]],
+    data: NDArray[np.floating[Any]] | pd.Series,
     *,
     normalize_at_x: float | None = None,
-    log_x: bool = False,
-    log_y: bool = False,
-    invert_x_axis: bool = False,
     **kwargs,
-) -> Axes:
+) -> Line2D:
     """Plot the cumulative distribution function of the data.
 
     Parameters
@@ -38,12 +28,6 @@ def cdf(
         The data to plot the cdf of.
     normalize_at_x : float, optional
         The x-value to normalize the cdf at. If not provided, the cdf will be normalized at the last x-value.
-    log_x : bool, optional
-        Whether to plot the x-axis on a log scale.
-    log_y : bool, optional
-        Whether to plot the y-axis on a log scale.
-    invert_x_axis : bool, optional
-        Whether to invert the x-axis.
     **kwargs
         Additional keyword arguments to pass to matplotlib.axes.Axes.plot.
 
@@ -56,36 +40,27 @@ def cdf(
     x = np.sort(data)
     y = np.arange(1, len(x) + 1)
 
-    if not log_x and not log_y:
-        x = np.insert(x, 0, 0)
-        y = np.insert(y, 0, 0)
+    x = np.insert(x, 0, 0)
+    y = np.insert(y, 0, 0)
 
     # normalize the cdf w.r.t normalize_at_x if provided else
     # normalize at the last x value
     normalize_idx = np.argmax(x >= normalize_at_x) if normalize_at_x else -1
     y = y / y[normalize_idx]
 
-    ax.plot(x, y, drawstyle="steps-post", **kwargs)
+    kwargs["label"] = kwargs["label"].format(len(x)) if "label" in kwargs else None
+    (line_plot,) = ax.plot(x, y, drawstyle="steps-post", **kwargs)
 
-    if log_x:
-        ax.set_xscale("log")
-
-    if log_y:
-        ax.set_yscale("log")
-
-    if invert_x_axis:
-        ax.invert_xaxis()
-
-    return ax
+    return line_plot
 
 
-def save_figure(f: Figure, filename: str, dpi: int = 300) -> None:
+def save_figure(ax: Axes, filename: str, dpi: int = 300) -> None:
     """Save a matplotlib figure.
 
     Parameters
     ----------
-    f : matplotlib.figure.Figure
-        The figure to save.
+    ax : matplotlib.axes.Axes
+        The axes we want to save the figure from.
     filename : str
         The filename to save the figure to.
     dpi : int, optional
@@ -95,5 +70,97 @@ def save_figure(f: Figure, filename: str, dpi: int = 300) -> None:
     -------
     None
     """
-    f.tight_layout(pad=0.1)
-    f.savefig(filename, dpi=dpi)
+    ax.figure.tight_layout(pad=0.1)
+    ax.figure.savefig(filename, dpi=dpi)
+    ax.clear()
+
+
+# customize matplotlib rcParams upon import
+mpl.rcParams.update(
+    {
+        "figure.figsize": (5, 3),
+        "axes.labelsize": 13,
+        "xtick.labelsize": 11,
+        "ytick.labelsize": 11,
+        "legend.fontsize": 11,
+        "font.family": "serif",
+        "font.serif": ["Computer Modern Roman"],
+        "text.usetex": True,
+        "legend.frameon": False,
+        "xtick.direction": "in",
+        "ytick.direction": "in",
+        "xtick.top": True,
+        "ytick.right": True,
+        "xtick.major.size": 6,
+        "ytick.major.size": 6,
+        "xtick.minor.size": 3,
+        "ytick.minor.size": 3,
+        "xtick.minor.visible": True,
+        "ytick.minor.visible": True,
+    }
+)
+
+
+# Custom color palette for the different lines we want to plot for this project
+class Colors(StrEnum):
+    ALL = "#444444"
+    SINGLES = "#0C5DA5"
+    MULTIS = "#FF2C00"
+    M2 = "#845B97"
+    M3_PLUS = "#00B945"
+    M_INNERMOST = "#F46649"
+    M_MIDDLE = "#BF2000"
+    M_OUTERMOST = "#733022"
+
+
+# Custom plot format for the different lines we want to plot for this project
+PLOT_FORMAT = {
+    "ALL": {
+        "color": Colors.ALL,
+        "linestyle": "solid",
+        "linewidth": 1.5,
+        "label": "[{}] All Planet Candidates",
+    },
+    "SINGLES": {
+        "color": Colors.SINGLES,
+        "linestyle": "solid",
+        "linewidth": 1.5,
+        "label": "[{}] Singles",
+    },
+    "MULTIS": {
+        "color": Colors.MULTIS,
+        "linestyle": "solid",
+        "linewidth": 1.5,
+        "label": "[{}] Multis",
+    },
+    "M2": {
+        "color": Colors.M2,
+        "linestyle": "dashed",
+        "linewidth": 1,
+        "label": r"[{}] $\mathcal{{M}}_2$",
+    },
+    "M3_PLUS": {
+        "color": Colors.M3_PLUS,
+        "linestyle": "dashed",
+        "linewidth": 1,
+        "label": r"[{}] $\mathcal{{M}}_{{3+}}$",
+    },
+    "M_INNERMOST": {
+        "color": Colors.M_INNERMOST,
+        "linestyle": "dotted",
+        "linewidth": 1,
+        "label": "[{}] Innermost of Multis",
+    },
+    "M_MIDDLE": {
+        "color": Colors.M_MIDDLE,
+        "linestyle": "dotted",
+        "linewidth": 1,
+        "label": "[{}] Middle of Multis",
+    },
+    "M_OUTERMOST": {
+        "color": Colors.M_OUTERMOST,
+        "linestyle": "dotted",
+        "linewidth": 1,
+        "label": "[{}] Outermost of Multis",
+    },
+}
