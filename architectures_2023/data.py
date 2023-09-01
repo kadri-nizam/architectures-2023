@@ -23,12 +23,12 @@ class KeplerData:
 
     singles: pd.DataFrame
     multis: pd.DataFrame
-    config: dict
-    status_flag: STATUS_FLAG
+    config: dict[str, Any] | None = None
+    status_flag: STATUS_FLAG | None = None
 
     def __repr__(self):
         info = f"KeplerData(singles:{len(self.singles)}, multis:{len(self.multis)})\n"
-        info += f"   Analysis Type: {self.status_flag.name}\n"
+        info += f"   Status Flag: {self.status_flag}\n"
         info += f"   M2: {len(self.m2)}\n"
         info += f"   M3+: {len(self.m3_plus)}\n"
 
