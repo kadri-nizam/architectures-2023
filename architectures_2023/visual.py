@@ -78,7 +78,7 @@ def save_figure(ax: Axes, filename: str, dpi: int = 300) -> None:
 # customize matplotlib rcParams upon import
 mpl.rcParams.update(
     {
-        "figure.figsize": (5, 3),
+        "figure.figsize": (6, 4),
         "axes.labelsize": 13,
         "xtick.labelsize": 11,
         "ytick.labelsize": 11,
