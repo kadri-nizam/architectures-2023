@@ -134,7 +134,6 @@ def load_data(data_path: str = "") -> tuple[pd.DataFrame, str]:
 
     df = pd.read_csv(data_path)
     df = clean_data(df)
-    df = _label_position(df)
 
     # cache the processed dataframe for future use
     df.to_csv(processed, index=False)
@@ -172,6 +171,9 @@ def process_data(
         singles, multis = _filter_then_split(df, fn)
     else:
         singles, multis = _split_then_filter(df, fn)
+
+    singles = _label_position(singles)
+    multis = _label_position(multis)
 
     if config["data_processing"]["demote_multis_to_singles"]:
         singles, multis = demote_multis_to_singles(singles, multis)
