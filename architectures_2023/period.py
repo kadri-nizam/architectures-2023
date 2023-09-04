@@ -215,7 +215,7 @@ def fraction_of_transiting_companions(ax: Axes, data: KeplerData) -> None:
             {
                 "color": "#061",
                 "linestyle": "dashed",
-                "label": rf"$R_p > {large_planet_cutoff}\textrm{{R}}_\oplus$ with I.C.",
+                "label": rf"$R_p > {large_planet_cutoff} \textrm{{R}}_\oplus$ with I.C.",
             },
         ),
         (
@@ -223,7 +223,7 @@ def fraction_of_transiting_companions(ax: Axes, data: KeplerData) -> None:
             {
                 "color": "#f60",
                 "linestyle": "dashed",
-                "label": rf"$R_p > {large_planet_cutoff}\textrm{{R}}_\oplus$ with O.C.",
+                "label": rf"$R_p > {large_planet_cutoff} \textrm{{R}}_\oplus$ with O.C.",
             },
         ),
     )

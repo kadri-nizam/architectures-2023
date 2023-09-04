@@ -132,10 +132,12 @@ def load_data(data_path: str = "") -> tuple[pd.DataFrame, str]:
         df = pd.read_csv(processed)
         return df, str(processed)
 
+    logging.log(logging.INFO, f"Loading data from {data_path}")
     df = pd.read_csv(data_path)
     df = clean_data(df)
 
     # cache the processed dataframe for future use
+    logging.log(logging.INFO, f"Caching processed data to {processed}")
     df.to_csv(processed, index=False)
 
     return df, data_path
