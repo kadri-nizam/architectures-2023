@@ -16,6 +16,8 @@ def cdf(
     data: NDArray[np.floating[Any]] | pd.Series,
     *,
     normalize_at_x: float | None = None,
+    start_cdf_at: float = 0.0,
+    include_zero: bool = True,
     **kwargs,
 ) -> Line2D:
     """Plot the cumulative distribution function of the data.
@@ -40,8 +42,9 @@ def cdf(
     x = np.sort(data)
     y = np.arange(1, len(x) + 1)
 
-    x = np.insert(x, 0, 0)
-    y = np.insert(y, 0, 0)
+    if include_zero:
+        x = np.insert(x, 0, start_cdf_at)
+        y = np.insert(y, 0, 0)
 
     # normalize the cdf w.r.t normalize_at_x if provided else
     # normalize at the last x value
@@ -80,9 +83,9 @@ mpl.rcParams.update(
     {
         "figure.figsize": (6, 4),
         "axes.labelsize": 13,
-        "xtick.labelsize": 11,
-        "ytick.labelsize": 11,
-        "legend.fontsize": 11,
+        "xtick.labelsize": 12,
+        "ytick.labelsize": 12,
+        "legend.fontsize": 12,
         "font.family": "serif",
         "font.serif": ["Computer Modern Roman"],
         "text.usetex": True,

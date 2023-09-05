@@ -1,7 +1,6 @@
 import logging
 
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.axes import Axes
 from scipy.stats import ks_2samp
 
@@ -12,9 +11,11 @@ __all__ = ["generate_figures"]
 
 
 def generate_figures(kepler: KeplerData) -> None:
-    ax = plt.subplot()
+    logging.log(
+        logging.INFO, f"Generating figures for period related data with {kepler}"
+    )
 
-    logging.log(logging.INFO, "Generating figures for period related data.")
+    ax = plt.subplot()
 
     cdf_singles_vs_multi_subsets(ax, kepler, "linear")
     cdf_singles_vs_multi_subsets(ax, kepler, "log")
@@ -24,7 +25,7 @@ def generate_figures(kepler: KeplerData) -> None:
     cdf_with_ttv_flag(ax, kepler, "linear")
     cdf_with_ttv_flag(ax, kepler, "log")
 
-    fraction_of_transiting_companions(ax, kepler)
+    fraction_of_transiting_companions(ax, kepler, large_planet_cutoff=5.0)
 
 
 def cdf_singles_vs_multi_subsets(
@@ -40,7 +41,7 @@ def cdf_singles_vs_multi_subsets(
 
     ax.set_xlabel("Period [days]")
     ax.set_ylabel("Normalized CDF")
-    ax.legend()
+    ax.legend(loc="lower right")
 
     save_figure(ax, f"period_cdf_singles_vs_multi_subsets_{x_scale}.pdf")
 
@@ -111,18 +112,18 @@ def cdf_with_ttv_flag(ax: Axes, data: KeplerData, x_scale: str = "log") -> None:
 
     # Some additional formatting for the plot is required here
     fmt = PLOT_FORMAT["SINGLES"].copy()
-    fmt["label"] = f"{fmt['label']} w/o TTV"
+    fmt["label"] = f"{fmt['label']} w TTV"
     cdf(ax, data.singles["ttvperiod"], **fmt)
 
-    fmt["label"] = fmt["label"].replace("w/o", "w/")
+    fmt["label"] = fmt["label"].replace("w", "w/o")
     fmt["linestyle"] = "dashed"
     cdf(ax, data_w_ttv.singles["ttvperiod"], **fmt)
 
     fmt = PLOT_FORMAT["MULTIS"].copy()
-    fmt["label"] = f"{fmt['label']} w/o TTV"
+    fmt["label"] = f"{fmt['label']} w TTV"
     cdf(ax, data.multis["ttvperiod"], **fmt)
 
-    fmt["label"] = fmt["label"].replace("w/o", "w/")
+    fmt["label"] = fmt["label"].replace("w", "w/o")
     fmt["linestyle"] = "dashed"
     cdf(ax, data_w_ttv.multis["ttvperiod"], **fmt)
 
@@ -132,12 +133,14 @@ def cdf_with_ttv_flag(ax: Axes, data: KeplerData, x_scale: str = "log") -> None:
 
     ax.set_xlabel("Period [days]")
     ax.set_ylabel("Normalized CDF")
-    ax.legend()
+    ax.legend(loc="lower right", markerfirst=False)
 
     save_figure(ax, f"period_cdf_with_ttv_flag_{x_scale}.pdf")
 
 
-def fraction_of_transiting_companions(ax: Axes, data: KeplerData) -> None:
+def fraction_of_transiting_companions(
+    ax: Axes, data: KeplerData, *, large_planet_cutoff: float = 5.0
+) -> None:
     """For each period in our dataset, find the fraction of candidates with a transit companion.
 
     For instance: for a period of x days how many candidates have a transiting companion that has a smaller/larger orbit?
@@ -168,7 +171,6 @@ def fraction_of_transiting_companions(ax: Axes, data: KeplerData) -> None:
     have_inner_companions = df["position"].isin(["middle", "outermost"])
     have_outer_companions = df["position"].isin(["innermost", "middle"])
 
-    large_planet_cutoff = 5
     large_planets = df["radius"] > large_planet_cutoff
     logging.log(logging.INFO, f"Large planets have R > {large_planet_cutoff} R_earth")
 
@@ -215,7 +217,7 @@ def fraction_of_transiting_companions(ax: Axes, data: KeplerData) -> None:
             {
                 "color": "#061",
                 "linestyle": "dashed",
-                "label": rf"$R_p > {large_planet_cutoff} \textrm{{R}}_\oplus$ with I.C.",
+                "label": (f"$R_p > {large_planet_cutoff}$ " r"R$_\oplus$ with I.C."),
             },
         ),
         (
@@ -223,7 +225,7 @@ def fraction_of_transiting_companions(ax: Axes, data: KeplerData) -> None:
             {
                 "color": "#f60",
                 "linestyle": "dashed",
-                "label": rf"$R_p > {large_planet_cutoff} \textrm{{R}}_\oplus$ with O.C.",
+                "label": (f"$R_p > {large_planet_cutoff}$ " r"R$_\oplus$ with O.C."),
             },
         ),
     )
@@ -234,6 +236,6 @@ def fraction_of_transiting_companions(ax: Axes, data: KeplerData) -> None:
     ax.set_xscale("log")
     ax.set_xlabel("Period [days]")
     ax.set_ylabel("Cumulative Fraction")
-    ax.legend(loc="center left")
+    ax.legend(loc="center left", bbox_to_anchor=(0, 0.6))
 
     save_figure(ax, "fraction_of_transiting_companions.pdf")
