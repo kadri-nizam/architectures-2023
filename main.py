@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime as dt
+from math import log
 
-from architectures_2023 import data, period
+from architectures_2023 import data, period, radius, snr
 
 # logging setup
 log_file = f"{dt.now().strftime('%Y%m%d')}.log"
@@ -18,10 +19,12 @@ def main():
     df, _ = data.load_data()
     config = data.load_config()
 
-    kepler = data.process_data(df, config, data.STATUS_FLAG.PERIOD_RELATED)
-    logging.log(logging.INFO, f"Data loaded and processed.\n\n{kepler}")
+    logging.log(logging.INFO, "Data loaded and processed.")
+    kepler_p = data.process_data(df, config, data.STATUS_FLAG.PERIOD_RELATED)
+    kepler_r = data.process_data(df, config, data.STATUS_FLAG.RADIUS_RELATED)
 
-    period.generate_figures(kepler)
+    period.generate_figures(kepler_p)
+    radius.generate_figures(kepler_r)
 
 
 if __name__ == "__main__":
