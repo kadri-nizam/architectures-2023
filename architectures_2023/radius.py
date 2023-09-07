@@ -1,6 +1,7 @@
 import logging
 from functools import partial
 
+import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
 
@@ -34,6 +35,10 @@ def generate_figures(kepler: KeplerData):
     long_period_singles(large_planet_cutoff=4)
     long_period_singles(large_planet_cutoff=4.5)
     long_period_singles(large_planet_cutoff=5)
+
+    cdf_population_period_with_radius_subsets(
+        ax, kepler, radius_bins=[0, 1.8, 5, 10, 1e12], b_cutoff=0.95
+    )
 
 
 def cdf_impact_param_over_radii_subsets(
@@ -180,3 +185,81 @@ def cdf_radii_of_long_period_singles(
         ax,
         f"radius_cdf_long_period_singles_gt_{large_planet_cutoff}REarth_{x_scale}.pdf",
     )
+
+
+def cdf_population_period_with_radius_subsets(
+    ax: Axes,
+    data: KeplerData,
+    *,
+    radius_bins: list[float],
+    b_cutoff: float = 0.95,
+    x_scale: str = "log",
+) -> None:
+    logging.log(logging.INFO, f"Additional restriction: b + b_ep < {b_cutoff}")
+    df = KeplerData(
+        data.singles.query("b + b_ep < @b_cutoff"),
+        data.multis.query("b + b_ep < @b_cutoff"),
+        status_flag=data.status_flag,
+    )
+
+    # get the bin indices (based on radius) for each planet
+    singles_bins = pd.cut(
+        df.singles["radius"], bins=radius_bins, include_lowest=True, labels=False
+    )
+    multis_bins = pd.cut(
+        df.multis["radius"], bins=radius_bins, include_lowest=True, labels=False
+    )
+
+    # this plot requires special formatting for the legend and the lines which
+    # the label formatting will be taken care of in the for loop
+    temp_label = r"{small} R$_\oplus < R_p \leq$ {large} R$_\oplus$"
+    plot_formats = [
+        {"label": r"$R_p \leq$ {large} R$_\oplus$", "linewidth": 1},
+        {"linestyle": "dashed", "linewidth": 1, "label": temp_label},
+        {"linestyle": "dotted", "linewidth": 1, "label": temp_label},
+        {"linestyle": "dashdot", "linewidth": 1, "label": r"{small} R$_\oplus < R_p$"},
+    ]
+
+    for bin_idx, fmt in zip(range(len(radius_bins) - 1), plot_formats):
+        # additional label formatting
+        fmt["label"] = (
+            r"[{}] "
+            f"{fmt['label'].format(small=radius_bins[bin_idx], large=radius_bins[bin_idx + 1])}"
+        )
+
+        cdf(
+            ax,
+            df.singles[singles_bins == bin_idx]["ttvperiod"],
+            **PLOT_FORMAT["SINGLES"] | fmt,
+        )
+        cdf(
+            ax,
+            df.multis[multis_bins == bin_idx]["ttvperiod"],
+            **PLOT_FORMAT["MULTIS"] | fmt,
+        )
+
+    ax.set_xscale(x_scale)  # type: ignore
+    ax.set_xlim(0.08, 8_000)
+    ax.set_xlabel("Period [days]")
+    ax.set_ylabel("Normalized CDF")
+
+    # we'll have to break the legend into two sections because there are a lot of lines
+    # See: https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html#multiple-legends-on-the-same-axes
+    handles, labels = ax.get_legend_handles_labels()
+    # even indices are singles, odd indices are multis
+    upper_left = ax.legend(
+        handles[::2],
+        labels[::2],
+        loc="upper left",
+        handletextpad=0.5,
+    )
+    ax.legend(
+        handles[1::2],
+        labels[1::2],
+        loc="lower right",
+        markerfirst=False,
+        handletextpad=0.5,
+    )
+    ax.add_artist(upper_left)
+
+    save_figure(ax, f"radius_cdf_population_period_with_radius_subsets_{x_scale}.pdf")
