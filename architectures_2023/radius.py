@@ -17,7 +17,7 @@ def generate_figures(kepler: KeplerData):
     ax = plt.subplot()
 
     cdf_impact_param_over_radii_subsets(
-        ax, kepler, large_planet_cutoff=2.5, normalize_at_x=1.0
+        ax, kepler, large_planet_cutoff=5, normalize_at_x=1.0
     )
 
     cdf_radii_of_population_subsets(ax, kepler, b_cutoff=0.95, normalize_at_x=5)
