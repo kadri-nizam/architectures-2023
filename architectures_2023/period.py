@@ -2,7 +2,6 @@ import logging
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
-from scipy.stats import ks_2samp
 
 from architectures_2023.data import KeplerData
 from architectures_2023.visual import PLOT_FORMAT, cdf, save_figure
@@ -17,19 +16,18 @@ def generate_figures(kepler: KeplerData) -> None:
 
     ax = plt.subplot()
 
-    cdf_singles_vs_multi_subsets(ax, kepler, "linear")
-    cdf_singles_vs_multi_subsets(ax, kepler, "log")
-
     cdf_population(ax, kepler)
+    cdf_singles_vs_multi_subsets(ax, kepler, x_scale="linear")
+    cdf_singles_vs_multi_subsets(ax, kepler, x_scale="log")
 
-    cdf_with_ttv_flag(ax, kepler, "linear")
-    cdf_with_ttv_flag(ax, kepler, "log")
+    cdf_with_ttv_flag(ax, kepler, x_scale="linear")
+    cdf_with_ttv_flag(ax, kepler, x_scale="log")
 
     fraction_of_transiting_companions(ax, kepler, large_planet_cutoff=5.0)
 
 
 def cdf_singles_vs_multi_subsets(
-    ax: Axes, data: KeplerData, x_scale: str = "log"
+    ax: Axes, data: KeplerData, *, x_scale: str = "log"
 ) -> None:
     cdf(ax, data.singles["ttvperiod"], **PLOT_FORMAT["SINGLES"])
     cdf(ax, data.m2["ttvperiod"], **PLOT_FORMAT["M2"])
@@ -46,7 +44,7 @@ def cdf_singles_vs_multi_subsets(
     save_figure(ax, f"period_cdf_singles_vs_multi_subsets_{x_scale}.pdf")
 
 
-def cdf_population(ax: Axes, data: KeplerData, x_scale: str = "log") -> None:
+def cdf_population(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> None:
     # we further restrict the data to only candidates with a minimum of 3 transits
     logging.log(logging.INFO, f"Additional restriction: nttobs >= 3")
     data = KeplerData(
@@ -81,7 +79,7 @@ def cdf_population(ax: Axes, data: KeplerData, x_scale: str = "log") -> None:
     save_figure(ax, f"period_cdf_population_{x_scale}.pdf")
 
 
-def cdf_with_ttv_flag(ax: Axes, data: KeplerData, x_scale: str = "log") -> None:
+def cdf_with_ttv_flag(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> None:
     data = KeplerData(
         data.singles.query("nttobs >= 3"),
         data.multis.query("nttobs >= 3"),

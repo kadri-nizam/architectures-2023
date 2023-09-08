@@ -8,6 +8,8 @@ from matplotlib.axes import Axes
 from architectures_2023.data import KeplerData
 from architectures_2023.visual import PLOT_FORMAT, cdf, save_figure
 
+__all__ = ["generate_figures", "generate_mono_transit_figures"]
+
 
 def generate_figures(kepler: KeplerData):
     logging.log(
@@ -20,7 +22,23 @@ def generate_figures(kepler: KeplerData):
         ax, kepler, large_planet_cutoff=5, normalize_at_x=1.0
     )
 
+    cdf_population_period_with_radius_subsets(
+        ax, kepler, radius_bins=[0, 1.8, 5, 10, 1e12], b_cutoff=0.95
+    )
+
+
+def generate_mono_transit_figures(kepler: KeplerData) -> None:
+    logging.log(
+        logging.INFO, f"Generating figures for radius related data with {kepler}"
+    )
+
+    ax = plt.subplot()
+
     cdf_radii_of_population_subsets(ax, kepler, b_cutoff=0.95, normalize_at_x=5)
+
+    cdf_impact_param_over_radii_subsets(
+        ax, kepler, large_planet_cutoff=5, normalize_at_x=1.0
+    )
 
     long_period_singles = partial(
         cdf_radii_of_long_period_singles,
@@ -35,10 +53,6 @@ def generate_figures(kepler: KeplerData):
     long_period_singles(large_planet_cutoff=4)
     long_period_singles(large_planet_cutoff=4.5)
     long_period_singles(large_planet_cutoff=5)
-
-    cdf_population_period_with_radius_subsets(
-        ax, kepler, radius_bins=[0, 1.8, 5, 10, 1e12], b_cutoff=0.95
-    )
 
 
 def cdf_impact_param_over_radii_subsets(
@@ -72,7 +86,7 @@ def cdf_impact_param_over_radii_subsets(
     ax.set_ylabel(f"CDF normalized at $b = {normalize_at_x}$")
     ax.legend(loc="lower right", markerfirst=False)
 
-    save_figure(ax, f"radius_cdf_impact_param_over_radii_subsets.pdf")
+    save_figure(ax, f"radius_w_mono_cdf_impact_param_over_radii_subsets.pdf")
 
 
 def cdf_radii_of_population_subsets(
@@ -108,8 +122,11 @@ def cdf_radii_of_population_subsets(
         ax.set_xlabel(r"Radius [$\mathrm{R}_\oplus$]")
         ax.set_ylabel(f"CDF normalized at $R_p = {normalize_at_x}$ " r"R$_\oplus$")
         ax.legend(loc="lower right", markerfirst=False)
+        ax.set_ylim(-0.01, 1.21)
 
-        save_figure(ax, f"radius_cdf_{'_'.join(group.keys()).lower()}_{x_scale}.pdf")
+        save_figure(
+            ax, f"radius_w_mono_cdf_{'_'.join(group.keys()).lower()}_{x_scale}.pdf"
+        )
 
 
 def cdf_radii_of_long_period_singles(
@@ -151,12 +168,12 @@ def cdf_radii_of_long_period_singles(
         logging.INFO, f"Long period planets have period > {long_period_cutoff} days"
     )
     fmt = PLOT_FORMAT["SINGLES"].copy()
-    fmt["label"] = rf"{fmt['label']} $(P \geq {long_period_cutoff}$ days$)$"
+    fmt["label"] = rf"{fmt['label']} $(|P| \geq {long_period_cutoff}$ days$)$"
     fmt["linewidth"] = 1.0
     fmt["linestyle"] = "dashed"
     cdf(
         ax,
-        df.singles.query("ttvperiod > @long_period_cutoff")["radius"],
+        df.singles.query("abs(ttvperiod) > @long_period_cutoff")["radius"],
         normalize_at_x=normalize_at_x,
         start_cdf_at=large_planet_cutoff,
         **fmt,
@@ -183,7 +200,9 @@ def cdf_radii_of_long_period_singles(
 
     save_figure(
         ax,
-        f"radius_cdf_long_period_singles_gt_{large_planet_cutoff}REarth_{x_scale}.pdf",
+        "radius_w_mono_cdf_long_period_singles_gt_"
+        f"{str(large_planet_cutoff).replace('.', '_')}"
+        f"REarth_{x_scale}.pdf",
     )
 
 
