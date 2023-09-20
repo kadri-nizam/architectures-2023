@@ -69,16 +69,7 @@ class KeplerData:
     def get_multis_system_with(
         self, *, num_planets: int, operator: str = "=="
     ) -> pd.DataFrame:
-        switch = {
-            "==": lambda x: x["koi"].count() == num_planets,
-            ">": lambda x: x["koi"].count() > num_planets,
-            ">=": lambda x: x["koi"].count() >= num_planets,
-            "<": lambda x: x["koi"].count() < num_planets,
-            "<=": lambda x: x["koi"].count() <= num_planets,
-        }
-
-        fn = switch.get(operator, switch["=="])
-        return self.multis.groupby("system").filter(fn)
+        return self.multis.query(f"multiplicity {operator} {num_planets}")
 
 
 def load_config(config_file_path: str = "") -> dict[str, Any]:
@@ -309,6 +300,7 @@ def _filter_then_split(
     filterer: Callable[[pd.DataFrame], pd.DataFrame],
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     df = filterer(df)
+    df["multiplicity"] = df.groupby("system")["koi"].transform("count")
     return get_multis_and_singles(df)
 
 
@@ -316,6 +308,7 @@ def _split_then_filter(
     df: pd.DataFrame,
     filterer: Callable[[pd.DataFrame], pd.DataFrame],
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    df["multiplicity"] = df.groupby("system")["koi"].transform("count")
     singles, multis = map(filterer, get_multis_and_singles(df))
     return singles, multis
 
