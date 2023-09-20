@@ -183,17 +183,6 @@ def cdf_radii_of_long_period_singles(
     if x_scale == "linear":
         ax.set_xlim(large_planet_cutoff - 1, 25)
 
-    # additional info on what we define as "large" planets
-    ax.text(
-        0.05,
-        0.94,
-        rf"Subset of PCs with $R_p > {large_planet_cutoff}$ R$_\oplus$",
-        fontsize=13,
-        horizontalalignment="left",
-        verticalalignment="top",
-        transform=ax.transAxes,
-    )
-
     ax.set_xlabel(r"Radius [$\mathrm{R}_\oplus$]")
     ax.set_ylabel(f"CDF normalized at $R_p = {normalize_at_x}$ " r"R$_\oplus$")
     ax.legend(loc="lower right", markerfirst=False)
