@@ -29,9 +29,24 @@ def generate_figures(kepler: KeplerData) -> None:
 def cdf_singles_vs_multi_subsets(
     ax: Axes, data: KeplerData, *, x_scale: str = "log"
 ) -> None:
-    cdf(ax, data.singles["ttvperiod"], **PLOT_FORMAT["SINGLES"])
-    cdf(ax, data.m2["ttvperiod"], **PLOT_FORMAT["M2"])
-    cdf(ax, data.m3_plus["ttvperiod"], **PLOT_FORMAT["M3_PLUS"])
+    cdf(
+        ax,
+        data.singles["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["SINGLES"],
+    )
+    cdf(
+        ax,
+        data.m2["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["M2"],
+    )
+    cdf(
+        ax,
+        data.m3_plus["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["M3_PLUS"],
+    )
 
     ax.set_xscale(x_scale)  # type: ignore
     if x_scale == "linear":
@@ -53,14 +68,54 @@ def cdf_population(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> None:
         status_flag=data.status_flag,
     )
 
-    cdf(ax, data.all_candidates["ttvperiod"], **PLOT_FORMAT["ALL"])
-    cdf(ax, data.singles["ttvperiod"], **PLOT_FORMAT["SINGLES"])
-    cdf(ax, data.multis["ttvperiod"], **PLOT_FORMAT["MULTIS"])
-    cdf(ax, data.m2["ttvperiod"], **PLOT_FORMAT["M2"])
-    cdf(ax, data.m3_plus["ttvperiod"], **PLOT_FORMAT["M3_PLUS"])
-    cdf(ax, data.innermost_multi["ttvperiod"], **PLOT_FORMAT["M_INNERMOST"])
-    cdf(ax, data.middle_multi["ttvperiod"], **PLOT_FORMAT["M_MIDDLE"])
-    cdf(ax, data.outermost_multi["ttvperiod"], **PLOT_FORMAT["M_OUTERMOST"])
+    cdf(
+        ax,
+        data.all_candidates["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["ALL"],
+    )
+    cdf(
+        ax,
+        data.singles["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["SINGLES"],
+    )
+    cdf(
+        ax,
+        data.multis["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["MULTIS"],
+    )
+    cdf(
+        ax,
+        data.m2["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["M2"],
+    )
+    cdf(
+        ax,
+        data.m3_plus["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["M3_PLUS"],
+    )
+    cdf(
+        ax,
+        data.innermost_multi["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["M_INNERMOST"],
+    )
+    cdf(
+        ax,
+        data.middle_multi["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["M_MIDDLE"],
+    )
+    cdf(
+        ax,
+        data.outermost_multi["ttvperiod"],
+        include_zero=(x_scale == "linear"),
+        **PLOT_FORMAT["M_OUTERMOST"],
+    )
 
     ax.set_xscale(x_scale)  # type: ignore
     if x_scale == "linear":
@@ -111,19 +166,19 @@ def cdf_with_ttv_flag(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> No
     # Some additional formatting for the plot is required here
     fmt = PLOT_FORMAT["SINGLES"].copy()
     fmt["label"] = f"{fmt['label']} w TTV"
-    cdf(ax, data.singles["ttvperiod"], **fmt)
+    cdf(ax, data.singles["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
 
     fmt["label"] = fmt["label"].replace("w", "w/o")
     fmt["linestyle"] = "dashed"
-    cdf(ax, data_w_ttv.singles["ttvperiod"], **fmt)
+    cdf(ax, data_w_ttv.singles["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
 
     fmt = PLOT_FORMAT["MULTIS"].copy()
     fmt["label"] = f"{fmt['label']} w TTV"
-    cdf(ax, data.multis["ttvperiod"], **fmt)
+    cdf(ax, data.multis["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
 
     fmt["label"] = fmt["label"].replace("w", "w/o")
     fmt["linestyle"] = "dashed"
-    cdf(ax, data_w_ttv.multis["ttvperiod"], **fmt)
+    cdf(ax, data_w_ttv.multis["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
 
     ax.set_xscale(x_scale)  # type: ignore
     if x_scale == "linear":

@@ -29,11 +29,15 @@ def main():
     # some figures in the paper include single transit planets with negative periods
     # those are done here
     logging.log(logging.INFO, "Config now allows negative period PCs.")
-    kepler_monos_included = data.process_data(
+    kepler_monos_included_p = data.process_data(
         df, config | {"min_ttvperiod": -1e12}, data.STATUS_FLAG.PERIOD_RELATED
     )
-    snr.generate_mono_transit_figures(kepler_monos_included)
-    radius.generate_mono_transit_figures(kepler_monos_included)
+    kepler_monos_included_r = data.process_data(
+        df, config | {"min_ttvperiod": -1e12}, data.STATUS_FLAG.RADIUS_RELATED
+    )
+
+    snr.generate_mono_transit_figures(kepler_monos_included_p)
+    radius.generate_mono_transit_figures(kepler_monos_included_r)
 
 
 if __name__ == "__main__":

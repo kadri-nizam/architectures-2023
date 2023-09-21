@@ -4,6 +4,7 @@ from functools import partial
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
+from scipy.stats import ks_2samp
 
 from architectures_2023.data import KeplerData
 from architectures_2023.visual import PLOT_FORMAT, cdf, save_figure
@@ -110,11 +111,17 @@ def cdf_radii_of_population_subsets(
     )
 
     for group in plot_group:
+        logging.log(
+            logging.INFO,
+            f"KS-Test for {'-'.join(group.keys())} pair: {ks_2samp(*group.values())})",  # type: ignore
+        )
+
         for k, v in group.items():
             cdf(
                 ax,
                 v,
                 normalize_at_x=normalize_at_x,
+                include_zero=(x_scale == "linear"),
                 **PLOT_FORMAT[k],
             )
 
@@ -122,6 +129,7 @@ def cdf_radii_of_population_subsets(
         ax.set_xlabel(r"Radius [$\mathrm{R}_\oplus$]")
         ax.set_ylabel(f"CDF normalized at $R_p = {normalize_at_x}$ " r"R$_\oplus$")
         ax.legend(loc="lower right", markerfirst=False)
+        ax.set_xlim(right=30)
         ax.set_ylim(-0.01, 1.21)
 
         save_figure(
@@ -138,6 +146,8 @@ def cdf_radii_of_long_period_singles(
     b_cutoff: float = 0.95,
     large_planet_cutoff: float = 5.0,
     long_period_cutoff: float = 10.0,
+    x_lim: tuple[float, float] = (0.08, 25),
+    y_lim: tuple[float, float] = (-0.01, 1.21),
 ) -> None:
     logging.log(
         logging.INFO,
@@ -154,6 +164,7 @@ def cdf_radii_of_long_period_singles(
         df.singles["radius"],
         normalize_at_x=normalize_at_x,
         start_cdf_at=large_planet_cutoff,
+        include_zero=(x_scale == "linear"),
         **PLOT_FORMAT["SINGLES"],
     )
     cdf(
@@ -161,6 +172,7 @@ def cdf_radii_of_long_period_singles(
         df.multis["radius"],
         normalize_at_x=normalize_at_x,
         start_cdf_at=large_planet_cutoff,
+        include_zero=(x_scale == "linear"),
         **PLOT_FORMAT["MULTIS"],
     )
 
@@ -176,13 +188,15 @@ def cdf_radii_of_long_period_singles(
         df.singles.query("abs(ttvperiod) > @long_period_cutoff")["radius"],
         normalize_at_x=normalize_at_x,
         start_cdf_at=large_planet_cutoff,
+        include_zero=(x_scale == "linear"),
         **fmt,
     )
 
     ax.set_xscale(x_scale)  # type: ignore
     if x_scale == "linear":
-        ax.set_xlim(large_planet_cutoff - 1, 25)
+        ax.set_xlim(2.9, 18)
 
+    ax.set_ylim(-0.01, 1.95)
     ax.set_xlabel(r"Radius [$\mathrm{R}_\oplus$]")
     ax.set_ylabel(f"CDF normalized at $R_p = {normalize_at_x}$ " r"R$_\oplus$")
     ax.legend(loc="lower right", markerfirst=False)
@@ -238,11 +252,13 @@ def cdf_population_period_with_radius_subsets(
         cdf(
             ax,
             df.singles[singles_bins == bin_idx]["ttvperiod"],
+            include_zero=(x_scale == "linear"),
             **PLOT_FORMAT["SINGLES"] | fmt,
         )
         cdf(
             ax,
             df.multis[multis_bins == bin_idx]["ttvperiod"],
+            include_zero=(x_scale == "linear"),
             **PLOT_FORMAT["MULTIS"] | fmt,
         )
 
