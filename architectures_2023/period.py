@@ -1,7 +1,9 @@
+import json
 import logging
 
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
+from scipy import stats
 
 from architectures_2023.data import KeplerData
 from architectures_2023.visual import PLOT_FORMAT, cdf, save_figure
@@ -11,9 +13,24 @@ __all__ = ["generate_figures"]
 
 def generate_figures(kepler: KeplerData) -> None:
     logging.log(
-        logging.INFO, f"Generating figures for period related data with {kepler}"
+        logging.INFO, f"Generating statistics for period related data with {kepler}"
+    )
+    stat_info = {
+        "KS-Singles_vs_Multis": stats.ks_2samp(
+            kepler.singles["ttvperiod"], kepler.multis["ttvperiod"]
+        ),
+        "KS-M2_vs_M3+": stats.ks_2samp(
+            kepler.m2["ttvperiod"], kepler.m3_plus["ttvperiod"]
+        ),
+    }
+    logging.log(
+        logging.INFO,
+        json.dumps(stat_info, indent=4, default=str),
     )
 
+    logging.log(
+        logging.INFO, f"Generating figures for period related data with {kepler}"
+    )
     ax = plt.subplot()
 
     cdf_population(ax, kepler)

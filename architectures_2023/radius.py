@@ -4,7 +4,6 @@ from functools import partial
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.axes import Axes
-from scipy.stats import ks_2samp
 
 from architectures_2023.data import KeplerData
 from architectures_2023.visual import PLOT_FORMAT, cdf, save_figure
@@ -111,11 +110,6 @@ def cdf_radii_of_population_subsets(
     )
 
     for group in plot_group:
-        logging.log(
-            logging.INFO,
-            f"KS-Test for {'-'.join(group.keys())} pair: {ks_2samp(*group.values())})",  # type: ignore
-        )
-
         for k, v in group.items():
             cdf(
                 ax,
@@ -263,7 +257,7 @@ def cdf_population_period_with_radius_subsets(
         )
 
     ax.set_xscale(x_scale)  # type: ignore
-    ax.set_xlim(0.08, 8_000)
+    ax.set_xlim(0.17, 1_500)
     ax.set_xlabel("Period [days]")
     ax.set_ylabel("Normalized CDF")
 
@@ -276,6 +270,7 @@ def cdf_population_period_with_radius_subsets(
         labels[::2],
         loc="upper left",
         handletextpad=0.5,
+        prop={"size": 9.75},
     )
     ax.legend(
         handles[1::2],
@@ -283,6 +278,7 @@ def cdf_population_period_with_radius_subsets(
         loc="lower right",
         markerfirst=False,
         handletextpad=0.5,
+        prop={"size": 9.75},
     )
     ax.add_artist(upper_left)
 
