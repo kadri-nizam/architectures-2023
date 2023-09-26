@@ -51,7 +51,7 @@ def cdf(
     normalize_idx = np.argmax(x >= normalize_at_x) if normalize_at_x else -1
     y = y / y[normalize_idx]
 
-    kwargs["label"] = kwargs["label"].format(len(x)) if "label" in kwargs else None
+    kwargs["label"] = kwargs["label"].format(len(data)) if "label" in kwargs else None
     (line_plot,) = ax.plot(x, y, drawstyle="steps-post", **kwargs)
 
     return line_plot
