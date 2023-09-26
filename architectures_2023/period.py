@@ -71,7 +71,8 @@ def cdf_singles_vs_multi_subsets(
 
     ax.set_xlabel("Period [days]")
     ax.set_ylabel("Normalized CDF")
-    ax.legend(loc="lower right")
+    if x_scale == "log":
+        ax.legend(loc="lower right")
 
     save_figure(ax, f"period_cdf_singles_vs_multi_subsets_{x_scale}.pdf")
 
@@ -174,6 +175,11 @@ def cdf_with_ttv_flag(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> No
         data.multis.query("ttvflag.str.match(@ttv_regex)"),
         status_flag=data.status_flag,
     )
+    data_wo_ttv = KeplerData(
+        data.singles.query("~ttvflag.str.match(@ttv_regex)"),
+        data.multis.query("~ttvflag.str.match(@ttv_regex)"),
+        status_flag=data.status_flag,
+    )
     logging.log(
         logging.INFO,
         f"Additional restriction for data with ttvflag filter: "
@@ -183,19 +189,19 @@ def cdf_with_ttv_flag(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> No
     # Some additional formatting for the plot is required here
     fmt = PLOT_FORMAT["SINGLES"].copy()
     fmt["label"] = f"{fmt['label']} w TTV"
-    cdf(ax, data.singles["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
+    cdf(ax, data_w_ttv.singles["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
 
     fmt["label"] = fmt["label"].replace("w", "w/o")
     fmt["linestyle"] = "dashed"
-    cdf(ax, data_w_ttv.singles["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
+    cdf(ax, data_wo_ttv.singles["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
 
     fmt = PLOT_FORMAT["MULTIS"].copy()
     fmt["label"] = f"{fmt['label']} w TTV"
-    cdf(ax, data.multis["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
+    cdf(ax, data_w_ttv.multis["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
 
     fmt["label"] = fmt["label"].replace("w", "w/o")
     fmt["linestyle"] = "dashed"
-    cdf(ax, data_w_ttv.multis["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
+    cdf(ax, data_wo_ttv.multis["ttvperiod"], include_zero=(x_scale == "linear"), **fmt)
 
     ax.set_xscale(x_scale)  # type: ignore
     if x_scale == "linear":
@@ -203,7 +209,8 @@ def cdf_with_ttv_flag(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> No
 
     ax.set_xlabel("Period [days]")
     ax.set_ylabel("Normalized CDF")
-    ax.legend(loc="lower right", markerfirst=False)
+    if x_scale == "log":
+        ax.legend(loc="lower right", markerfirst=False)
 
     save_figure(ax, f"period_cdf_with_ttv_flag_{x_scale}.pdf")
 
