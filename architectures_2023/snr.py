@@ -20,8 +20,13 @@ def generate_mono_transit_figures(kepler: KeplerData):
 
 
 def counts_of_snr(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> None:
-    # bins are set to be equal size in log space
-    bins = np.logspace(0.85, 3, 75)
+    bins = 10 ** np.arange(
+        np.log10(int(data.all_candidates["snr"].min())),
+        np.log10(int(data.all_candidates["snr"].max())),
+        0.02905405,
+        # 0.032,
+        # 0.045,
+    )
 
     ax.hist(
         data.singles["snr"],
@@ -50,6 +55,7 @@ def counts_of_snr(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> None:
     ax.set_xscale(x_scale)  # type: ignore
     ax.set_xlabel("S/N")
     ax.set_ylabel("Number of Planet Candidates")
+    ax.set_xlim(5, 1000)
 
     ax.legend(loc="upper right", markerfirst=False)
     save_figure(ax, f"snr_hist_counts_{x_scale}.pdf")
@@ -81,6 +87,8 @@ def counts_of_kepler_mag(ax: Axes, data: KeplerData, *, y_scale: str = "log") ->
     ax.set_yscale(y_scale)  # type: ignore
     ax.set_xlabel(r"\textit{Kepler} Magnitude of Host Star")
     ax.set_ylabel("Number of Planet Candidates")
+
+    ax.set_xlim(left=7.5)
 
     ax.legend(loc="upper left")
     save_figure(ax, f"snr_hist_kepler_mag_counts.pdf")
