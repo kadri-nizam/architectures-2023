@@ -3,12 +3,6 @@
 pre_split_filtering = false
 demote_multis_to_singles = true
 
-# three choices available representing status flag that:
-#   PERIOD_RELATED: Starts with P
-#   RADIUS_RELATED = Starts with P or R
-#   R_DISPOSITION_RELATED = Starts with R
-status_flag = "period_related"
-
 # configurations related to how data is filtered before analysis
 [data_filtering]
 min_ttvperiod = 0

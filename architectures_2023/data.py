@@ -1,3 +1,4 @@
+import json
 import logging
 import tomllib
 from dataclasses import dataclass
@@ -85,14 +86,11 @@ def load_config(config_file_path: str = "") -> dict[str, Any]:
         dict[str, Any]
             Configuration dictionary.
     """
-    import json
-
     if not config_file_path:
         config_file_path = f"{Path(__file__).parent / '../config.toml'}"
 
     with open(config_file_path, "rb") as f:
         config = tomllib.load(f)
-        logging.log(logging.INFO, f"Config:\n{json.dumps(config, indent=3)}")
         return config
 
 
@@ -157,6 +155,10 @@ def process_data(
         KeplerData
             Instance of KeplerData containing the singles and multis dataframes.
     """
+    logging.log(
+        logging.INFO,
+        f"Config:\n{json.dumps(config | {'status_flag': status_flag}, indent=3)}",
+    )
 
     fn = partial(filter_data, status_flag=status_flag, **config["data_filtering"])
 
@@ -177,8 +179,8 @@ def process_data(
 def filter_data(
     df: pd.DataFrame,
     status_flag: STATUS_FLAG | None = None,
-    min_ttvperiod: float = 0,
-    min_snr: float = 12,
+    min_ttvperiod: float | None = None,
+    min_snr: float | None = None,
 ) -> pd.DataFrame:
     """Filters the dataframe based on the status flag, minimum TTV period and minimum SNR.
 
@@ -198,10 +200,13 @@ def filter_data(
             Filtered dataframe.
     """
     if status_flag is not None:
-        df = df[df["statusflag"].str.match(status_flag)]
+        df = df.loc[df["statusflag"].str.match(status_flag)]
 
-    df = df[df["ttvperiod"] >= min_ttvperiod]
-    df = df[df["snr"] >= min_snr]
+    if min_ttvperiod is not None:
+        df = df.loc[df["ttvperiod"] >= min_ttvperiod]
+
+    if min_snr is not None:
+        df = df.loc[df["snr"] >= min_snr]
 
     return df.reset_index(drop=True)
 
@@ -221,7 +226,7 @@ def get_multis_and_singles(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame
     """
 
     multis_mask = df["system"].duplicated(keep=False)
-    multis = df[multis_mask].reset_index(drop=True)
+    multis = df.loc[multis_mask].reset_index(drop=True)
 
     singles = df.drop(df[multis_mask].index).reset_index(drop=True)
 
