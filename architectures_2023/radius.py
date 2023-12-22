@@ -13,7 +13,7 @@ __all__ = ["generate_figures", "generate_mono_transit_figures"]
 
 def generate_figures(kepler: KeplerData):
     logging.log(
-        logging.INFO, f"Generating figures for radius related data with {kepler}"
+        logging.INFO, f"Generating figures for radius related data with\n{kepler}"
     )
 
     ax = plt.subplot()
@@ -29,7 +29,7 @@ def generate_figures(kepler: KeplerData):
 
 def generate_mono_transit_figures(kepler: KeplerData) -> None:
     logging.log(
-        logging.INFO, f"Generating figures for radius related data with {kepler}"
+        logging.INFO, f"Generating figures for radius related data with\n{kepler}"
     )
 
     ax = plt.subplot()

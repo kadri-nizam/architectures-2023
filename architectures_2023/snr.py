@@ -13,7 +13,9 @@ __all__ = ["generate_mono_transit_figures"]
 def generate_mono_transit_figures(kepler: KeplerData):
     ax = plt.subplot()
 
-    logging.log(logging.INFO, f"Generating figures for SNR related data with {kepler}")
+    logging.log(
+        logging.INFO, f"Generating figures for SNR related data with:\n{kepler}"
+    )
 
     counts_of_snr(ax, kepler, x_scale="log")
     counts_of_kepler_mag(ax, kepler, y_scale="log")
@@ -23,7 +25,7 @@ def counts_of_snr(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> None:
     bins = 10 ** np.arange(
         np.log10(int(data.all_candidates["snr"].min())),
         np.log10(int(data.all_candidates["snr"].max())),
-        0.02905405,
+        0.029,
         # 0.032,
         # 0.045,
     )

@@ -29,7 +29,7 @@ def generate_figures(kepler: KeplerData) -> None:
     )
 
     logging.log(
-        logging.INFO, f"Generating figures for period related data with {kepler}"
+        logging.INFO, f"Generating figures for period related data with\n{kepler}"
     )
     ax = plt.subplot()
 
