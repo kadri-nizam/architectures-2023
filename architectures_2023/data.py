@@ -1,6 +1,5 @@
 import json
 import logging
-import tomllib
 from dataclasses import dataclass
 from enum import StrEnum
 from functools import partial
@@ -8,6 +7,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 import pandas as pd
+import tomllib
 
 
 class STATUS_FLAG(StrEnum):
@@ -298,11 +298,13 @@ def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Convert names from the published catalog to the older names from the internal catalog
-    df = df.rename(columns={
-        "period": "ttvperiod",
-        "period_e": "ttvperiod_e",
-        "disposition": "statusflag"
-    })
+    df = df.rename(
+        columns={
+            "period": "ttvperiod",
+            "period_e": "ttvperiod_e",
+            "disposition": "statusflag",
+        }
+    )
 
     return df
 
