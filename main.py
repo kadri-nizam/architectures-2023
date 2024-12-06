@@ -4,6 +4,7 @@ from datetime import datetime as dt
 import pandas as pd
 
 from architectures_2023 import data, period, radius, snr
+from joblib import Parallel, delayed
 
 # logging setup
 log_file = f"{dt.now().strftime('%Y%m%d')}.log"
@@ -62,15 +63,18 @@ def snr_related(df: pd.DataFrame):
 def main():
     df, _ = data.load_data()
 
-    period_related(df)
-    radius_related(df)
+    task = []
+    task.append(delayed(period_related)(df))
+    task.append(delayed(radius_related)(df))
 
     # include negative period PCs
-    mono_inclusive_radius_related(df)
+    task.append(delayed(mono_inclusive_radius_related)(df))
 
     # include negative period PCs and all SNR
-    snr_related(df)
+    task.append(delayed(snr_related)(df))
 
+    # Actually execute all the functions in parallel now
+    Parallel(n_jobs=4, verbose=20)(task)
     logging.log(logging.INFO, f"{10 * '='} END OF RUN {10 * '='}")
 
 

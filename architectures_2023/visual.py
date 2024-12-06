@@ -13,7 +13,7 @@ __all__ = ["cdf", "save_figure", "Colors", "PLOT_FORMAT"]
 
 def cdf(
     ax: Axes,
-    data: NDArray[np.floating[Any]] | pd.Series,
+    data: Any,
     *,
     normalize_at_x: float | None = None,
     start_cdf_at: float = 0.0,
@@ -87,8 +87,8 @@ mpl.rcParams.update(
         "ytick.labelsize": 12,
         "legend.fontsize": 12,
         "font.family": "serif",
-        "font.serif": ["Computer Modern Roman"],
-        "text.usetex": True,
+        "mathtext.fontset": "cm",
+        "font.family": "cmu serif",
         "legend.frameon": False,
         "xtick.direction": "in",
         "ytick.direction": "in",

@@ -32,13 +32,13 @@ def counts_of_snr(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> None:
 
     ax.hist(
         data.singles["snr"],
-        bins=bins,
+        bins=bins.data,
         histtype="step",
         **PLOT_FORMAT["SINGLES"] | {"label": "Singles"},
     )
     ax.hist(
         data.multis["snr"],
-        bins=bins,
+        bins=bins.data,
         histtype="step",
         **PLOT_FORMAT["MULTIS"] | {"label": "Multis"},
     )
@@ -49,7 +49,7 @@ def counts_of_snr(ax: Axes, data: KeplerData, *, x_scale: str = "log") -> None:
     fmt["label"] = f"Weakest S/N in Multis"
     ax.hist(
         data.multis.groupby("system")["snr"].min(),
-        bins=bins,
+        bins=bins.data,
         histtype="step",
         **fmt,
     )
@@ -68,7 +68,7 @@ def counts_of_kepler_mag(ax: Axes, data: KeplerData, *, y_scale: str = "log") ->
 
     ax.hist(
         data.singles["kepmag"],
-        bins=bins,
+        bins=bins.data,
         histtype="step",
         **PLOT_FORMAT["SINGLES"] | {"label": "Singles"},
     )
@@ -76,7 +76,7 @@ def counts_of_kepler_mag(ax: Axes, data: KeplerData, *, y_scale: str = "log") ->
     fmt = PLOT_FORMAT["MULTIS"].copy()
     ax.hist(
         data.multis.groupby("system")["kepmag"].first(),
-        bins=bins,
+        bins=bins.data,
         histtype="step",
         **fmt | {"label": f"Systems of Multis"},
     )
@@ -84,7 +84,7 @@ def counts_of_kepler_mag(ax: Axes, data: KeplerData, *, y_scale: str = "log") ->
     fmt["linewidth"] = 1
     fmt["linestyle"] = "dashed"
     fmt["label"] = f"PCs in Multis"
-    ax.hist(data.multis["kepmag"], bins=bins, histtype="step", **fmt)
+    ax.hist(data.multis["kepmag"], bins=bins.data, histtype="step", **fmt)
 
     ax.set_yscale(y_scale)  # type: ignore
     ax.set_xlabel(r"\textit{Kepler} Magnitude of Host Star")

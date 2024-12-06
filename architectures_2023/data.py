@@ -297,6 +297,13 @@ def _clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
         .str.replace("__", "_")
     )
 
+    # Convert names from the published catalog to the older names from the internal catalog
+    df = df.rename(columns={
+        "period": "ttvperiod",
+        "period_e": "ttvperiod_e",
+        "disposition": "statusflag"
+    })
+
     return df
 
 
@@ -413,35 +420,33 @@ COLUMN_DATATYPE = {
     "rhostar_model_em": "float64",
     "u1": "float64",
     "u2": "float64",
+    "ttvflag": "category",
     "nttobs": "int64",
     "ntt": "int64",
-    "ttvflag": "category",
     "tdepth": "float64",
     "tdepth_e": "float64",
     "tdur": "float64",
     "tdur_e": "float64",
     "tduravg": "float64",
     "tduravg_e": "float64",
-    "radius": "float64",
-    "radius_ep": "float64",
-    "radius_em": "float64",
     "snr": "float64",
-    "snrwottv_snrwttv": "float64",
     "mes": "float64",
+    "snrwottv_snrwttv": "float64",
     "chisqwttv": "float64",
     "chisqwottv": "float64",
-    "dchisq_inj": "float64",
     "adrs": "float64",
     "adrs_ep": "float64",
     "adrs_em": "float64",
     "incl": "float64",
     "incl_ep": "float64",
     "incl_em": "float64",
+    "radius": "float64",
+    "radius_ep": "float64",
+    "radius_em": "float64",
     "s0": "float64",
     "s0_ep": "float64",
     "s0_em": "float64",
     "kepmag": "float64",
-    "stellar_source": "int8",
     "rhostar": "float64",
     "rhostar_ep": "float64",
     "rhostar_em": "float64",
@@ -458,13 +463,6 @@ COLUMN_DATATYPE = {
     "logg_em": "float64",
     "m_h": "float64",
     "m_h_e": "float64",
+    "stellar_source": "int8",
     "statusflag": "category",
-    "rhostar_model_lc": "float64",
-    "epoch_lc": "float64",
-    "per_lc": "float64",
-    "b_lc": "float64",
-    "rprs_lc": "float64",
-    "lcflag": "bool",
-    "ttvper_cor": "float64",
-    "ttvper_cor_err": "float64",
 }
